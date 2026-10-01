@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flix Dashboard</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-badge">F</div>
+          <div>
+            <p class="eyebrow">Community Bot</p>
+            <h1>Flix</h1>
+          </div>
+        </div>
+
+        <nav>
+          <a href="#" class="active">Overview</a>
+          <a href="#">Guild Settings</a>
+          <a href="#">Automation</a>
+          <a href="#">Maintenance</a>
+        </nav>
+      </aside>
+
+      <main class="content">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Bot Control Center</p>
+            <h2>System overview</h2>
+          </div>
+          <button id="toggleMaintenance" class="primary-button">Toggle maintenance</button>
+        </header>
+
+        <section class="stats">
+          <article class="stat-card">
+            <span class="label">Bot status</span>
+            <strong id="statusText">Loading...</strong>
+          </article>
+          <article class="stat-card">
+            <span class="label">Guild locked</span>
+            <strong id="serverId">Loading...</strong>
+          </article>
+          <article class="stat-card">
+            <span class="label">Welcome channel</span>
+            <strong id="welcomeChannel">Loading...</strong>
+          </article>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h3>Maintenance broadcast</h3>
+          </div>
+          <p id="maintenanceMessage">Loading...</p>
+        </section>
+      </main>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
