@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -8,6 +8,13 @@ module.exports = {
     const sent = await interaction.reply({ content: 'Pinging...', fetchReply: true });
     const ping = sent.createdTimestamp - interaction.createdTimestamp;
 
-    await interaction.editReply({ content: `🏓 Pong! Bot latency: ${ping}ms` });
+    const embed = new EmbedBuilder()
+      .setColor('#6d82ff')
+      .setTitle('🏓 Pong!')
+      .setDescription(`Bot latency: **${ping}ms**`)
+      .setFooter({ text: 'Flix Bot', iconURL: interaction.client.user.displayAvatarURL() })
+      .setTimestamp();
+
+    await interaction.editReply({ content: '', embeds: [embed] });
   }
 };
