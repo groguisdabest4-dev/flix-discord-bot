@@ -1,8 +1,19 @@
-const { ActivityType, GatewayIntentBits, Partials, Client } = require('discord.js');
+const { ActivityType, GatewayIntentBits, Partials, Client, ContainerBuilder, TextDisplayBuilder, MessageFlags } = require('discord.js');
 const config = require('./config');
 const { getState, setMaintenance, createOrUpdateSetting } = require('./db');
 const { registerSlashCommands } = require('./commands/register');
 const { loadCommands } = require('./commands');
+
+function buildMaintenanceStateMessage(message) {
+  return new ContainerBuilder()
+    .setAccentColor(0xf59e0b)
+    .addTextDisplayComponents(
+      new TextDisplayBuilder().setContent('## 🚧 Flix is under maintenance')
+    )
+    .addTextDisplayComponents(
+      new TextDisplayBuilder().setContent(message)
+    );
+}
 
 async function createBot() {
   const client = new Client({
@@ -64,8 +75,10 @@ async function createBot() {
     const state = getState();
 
     if (state.maintenanceMode && commandName !== 'maintenance') {
+      const container = buildMaintenanceStateMessage(config.MAINTENANCE_MESSAGE);
       await interaction.reply({
-        content: `🚧 ${config.APP_NAME} is currently under major updates. We will let you know when the bot is back online.`,
+        components: [container],
+        flags: MessageFlags.IsComponentsV2,
         ephemeral: true
       });
       return;
