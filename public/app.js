@@ -1,193 +1,303 @@
-let currentData = {};
-
-// Initialize dashboard
-window.addEventListener('DOMContentLoaded', () => {
-  setupTabNavigation();
-  fetchStatus();
-  setInterval(fetchStatus, 5000);
-});
-
-// Tab Navigation
-function setupTabNavigation() {
-  const navLinks = document.querySelectorAll('.nav-link');
-  navLinks.forEach(link => {
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
-      const tabName = link.getAttribute('data-tab');
-      switchTab(tabName);
-    });
-  });
+* {
+  box-sizing: border-box;
 }
 
-function switchTab(tabName) {
-  // Hide all tabs
-  document.querySelectorAll('.tab-content').forEach(tab => {
-    tab.classList.remove('active');
-  });
+:root {
+  --bg: #f4f7fb;
+  --panel: #ffffff;
+  --panel-alt: #f8fafc;
+  --line: #e5e7eb;
+  --text: #111827;
+  --muted: #6b7280;
+  --primary: #5b6cff;
+  --primary-strong: #3e4de6;
+  --success: #16a34a;
+  --warning: #f59e0b;
+  --danger: #dc2626;
+  --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
 
-  // Remove active from nav links
-  document.querySelectorAll('.nav-link').forEach(link => {
-    link.classList.remove('active');
-  });
+html {
+  scroll-behavior: smooth;
+}
 
-  // Show selected tab
-  const selectedTab = document.getElementById(tabName);
-  if (selectedTab) {
-    selectedTab.classList.add('active');
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+.shell {
+  min-height: 100vh;
+  display: flex;
+  background: var(--bg);
+}
+
+.sidebar {
+  width: 280px;
+  background: white;
+  border-right: 1px solid var(--line);
+  padding: 32px 24px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 48px;
+}
+
+.brand-badge {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #6d82ff, #8b5cf6);
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 1.4rem;
+  color: white;
+  box-shadow: 0 4px 12px rgba(109, 130, 255, 0.3);
+}
+
+h1, h2, h3, h4, p {
+  margin: 0;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: var(--text);
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  background: var(--panel-alt);
+  color: var(--primary-strong);
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  display: flex;
+  gap: 12px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+
+.sidebar-footer a {
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.content {
+  flex: 1;
+  padding: 40px 32px;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.primary-button {
+  border: none;
+  background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+  color: white;
+  font-weight: 700;
+  padding: 12px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.stat-card,
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+}
+
+.stat-card {
+  padding: 22px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.label {
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.stat-card strong {
+  font-size: 1.3rem;
+}
+
+.status-badge {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--warning);
+  display: inline-block;
+}
+
+.status-badge.success {
+  background: var(--success);
+}
+
+.status-badge.danger {
+  background: var(--danger);
+}
+
+.panel {
+  padding: 22px 20px;
+  margin-bottom: 22px;
+}
+
+.panel-header {
+  margin-bottom: 16px;
+}
+
+.form-grid {
+  display: grid;
+  gap: 18px;
+}
+
+label {
+  display: grid;
+  gap: 8px;
+  color: var(--text);
+  font-weight: 600;
+}
+
+input,
+textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: #fff;
+  color: var(--text);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.toggle-list {
+  display: grid;
+  gap: 12px;
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+}
+
+.log-list {
+  padding-left: 18px;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+  color: var(--muted);
+}
+
+.legal-page {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 32px;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+}
+
+.legal-page h1 {
+  margin-bottom: 24px;
+}
+
+.legal-page h2 {
+  margin-top: 28px;
+  margin-bottom: 12px;
+}
+
+.legal-page p,
+.legal-page li {
+  color: #374151;
+  line-height: 1.7;
+}
+
+.legal-page ul {
+  padding-left: 20px;
+}
+
+@media (max-width: 900px) {
+  .shell {
+    flex-direction: column;
   }
 
-  // Mark nav link as active
-  document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-}
-
-// Fetch and display status
-async function fetchStatus() {
-  try {
-    const response = await fetch('/api/status');
-    const data = await response.json();
-    currentData = data;
-
-    // Update overview tab
-    const statusText = data.maintenanceMode ? 'Maintenance Mode' : 'Live';
-    document.getElementById('statusText').textContent = statusText;
-    document.getElementById('serverId').textContent = data.serverId || 'Not configured';
-    document.getElementById('welcomeChannel').textContent = data.welcomeChannelId || 'Not configured';
-    document.getElementById('maintenanceChannel').textContent = data.maintenanceChannelId || 'Not configured';
-    document.getElementById('maintenanceMessage').textContent = data.maintenanceMessage || 'No maintenance message set.';
-    document.getElementById('lastUpdated').textContent = data.lastUpdatedAt ? `Last updated: ${new Date(data.lastUpdatedAt).toLocaleString()}` : '';
-
-    // Update badge
-    const badge = document.getElementById('statusBadge');
-    badge.textContent = statusText;
-    badge.className = `status-badge ${data.maintenanceMode ? 'maintenance' : 'live'}`;
-
-    // Update maintenance mode UI
-    const enableBtn = document.getElementById('enableMaintenanceBtn');
-    const disableBtn = document.getElementById('disableMaintenanceBtn');
-    const statusDiv = document.getElementById('maintenanceStatus');
-
-    if (data.maintenanceMode) {
-      enableBtn.style.display = 'none';
-      disableBtn.style.display = 'block';
-      statusDiv.innerHTML = '<span style="color: #f59e0b; font-weight: 600;">🚧 Maintenance mode is ACTIVE</span>';
-    } else {
-      enableBtn.style.display = 'block';
-      disableBtn.style.display = 'none';
-      statusDiv.innerHTML = '<span style="color: #22c55e; font-weight: 600;">✅ Bot is LIVE</span>';
-    }
-  } catch (error) {
-    console.error('Failed to fetch status:', error);
-  }
-}
-
-// Maintenance controls
-async function toggleMaintenance() {
-  const status = await fetch('/api/status');
-  const current = await status.json();
-  const nextValue = !current.maintenanceMode;
-
-  await fetch('/api/maintenance', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ enabled: nextValue })
-  });
-
-  fetchStatus();
-}
-
-async function enableMaintenance() {
-  await toggleMaintenance();
-}
-
-async function disableMaintenance() {
-  await toggleMaintenance();
-}
-
-// Guild settings
-function saveGuildSettings() {
-  alert('Guild settings save feature coming soon!');
-}
-
-function resetGuildSettings() {
-  fetchStatus();
-}
-
-// Welcome message
-function saveWelcomeMessage() {
-  const message = document.getElementById('welcomeMessageContent').value;
-  alert('Welcome message saved! (Feature in development)');
-}
-
-// Embed builder
-function previewEmbed() {
-  const title = document.getElementById('embedTitle').value;
-  const description = document.getElementById('embedDescription').value;
-  const color = document.getElementById('embedColor').value;
-  const fieldsText = document.getElementById('embedFields').value;
-
-  let fields = [];
-  try {
-    if (fieldsText) {
-      fields = JSON.parse(fieldsText);
-    }
-  } catch (e) {
-    alert('Invalid JSON in fields');
-    return;
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: static;
+    border-right: none;
+    border-bottom: 1px solid var(--line);
   }
 
-  const embedCode = {
-    title,
-    description,
-    color,
-    fields,
-    timestamp: new Date().toISOString(),
-    footer: {
-      text: 'Flix Community Bot'
-    }
-  };
-
-  const previewDiv = document.getElementById('embedPreview');
-  const codeDiv = document.getElementById('embedPreviewCode');
-  codeDiv.textContent = JSON.stringify(embedCode, null, 2);
-  previewDiv.style.display = 'block';
-}
-
-function copyEmbedCode() {
-  const code = document.getElementById('embedPreviewCode').textContent;
-  navigator.clipboard.writeText(code).then(() => {
-    alert('Embed code copied to clipboard!');
-  }).catch(() => {
-    alert('Failed to copy to clipboard');
-  });
-}
-
-// Log functionality
-function loadLogs() {
-  const logsList = document.getElementById('logsList');
-  const logs = [
-    { time: new Date(), action: 'Bot started', status: 'success' },
-    { time: new Date(Date.now() - 5000), action: 'Dashboard loaded', status: 'success' },
-    { time: new Date(Date.now() - 10000), action: 'Checking guild configuration', status: 'info' }
-  ];
-
-  logsList.innerHTML = logs.map(log => `
-    <div style="padding: 12px; border-bottom: 1px solid #e5e7eb; font-size: 0.9rem;">
-      <span style="color: #9ca3af;">${log.time.toLocaleTimeString()}</span>
-      <span style="margin-left: 12px; color: #1f2937;">${log.action}</span>
-      <span style="margin-left: 12px; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;" 
-            style="background: ${log.status === 'success' ? '#dcfce7' : '#dbeafe'}; color: ${log.status === 'success' ? '#166534' : '#1e40af'};">
-        ${log.status.toUpperCase()}
-      </span>
-    </div>
-  `).join('');
-}
-
-// Load logs when logs tab is opened
-document.addEventListener('click', (e) => {
-  if (e.target?.getAttribute('data-tab') === 'logs') {
-    loadLogs();
+  .content {
+    padding: 24px 18px 40px;
   }
-});
-
-// Event listeners
-document.getElementById('toggleMaintenance').addEventListener('click', toggleMaintenance);
+}

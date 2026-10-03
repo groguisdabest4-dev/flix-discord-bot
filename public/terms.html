@@ -1,0 +1,96 @@
+async function fetchStatus() {
+  try {
+    const response = await fetch('/api/status');
+    const data = await response.json();
+
+    const statusText = document.getElementById('statusText');
+    const statusBadge = document.getElementById('statusBadge');
+    const serverId = document.getElementById('serverId');
+    const publicUrl = document.getElementById('publicUrl');
+    const maintenanceMessage = document.getElementById('maintenanceMessage');
+
+    if (statusText) statusText.textContent = data.maintenanceMode ? 'Maintenance mode' : 'Live';
+    if (statusBadge) {
+      statusBadge.classList.toggle('success', !data.maintenanceMode);
+      statusBadge.classList.toggle('danger', data.maintenanceMode);
+    }
+    if (serverId) serverId.textContent = data.serverId || 'Not configured';
+    if (publicUrl) publicUrl.textContent = data.publicUrl || 'Not configured';
+    if (maintenanceMessage) maintenanceMessage.textContent = data.maintenanceMessage || 'No maintenance message set.';
+  } catch (error) {
+    console.error('Failed to fetch dashboard status:', error);
+  }
+}
+
+const toggleButton = document.getElementById('toggleMaintenance');
+if (toggleButton) {
+  toggleButton.addEventListener('click', async () => {
+    try {
+      const statusResponse = await fetch('/api/status');
+      const current = await statusResponse.json();
+      const nextValue = !current.maintenanceMode;
+
+      await fetch('/api/maintenance', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ enabled: nextValue })
+      });
+
+      fetchStatus();
+    } catch (error) {
+      console.error('Failed to toggle maintenance mode:', error);
+    }
+  });
+}
+
+const navLinks = document.querySelectorAll('.nav-link');
+navLinks.forEach(link => {
+  link.addEventListener('click', () => {
+    navLinks.forEach(item => item.classList.remove('active'));
+    link.classList.add('active');
+
+    const target = link.dataset.tab;
+    document.querySelectorAll('.tab-content').forEach(tab => {
+      tab.classList.toggle('active', tab.id === target);
+    });
+  });
+});
+
+fetchStatus();
+
+const saveMaintenanceButton = document.getElementById('saveMaintenanceMessage');
+if (saveMaintenanceButton) {
+  saveMaintenanceButton.addEventListener('click', async () => {
+    const input = document.getElementById('maintenanceText');
+    if (!input) return;
+
+    await fetch('/api/maintenance', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enabled: true, message: input.value })
+    });
+
+    fetchStatus();
+  });
+}
+
+const saveWelcomeButton = document.getElementById('saveWelcomeSettings');
+if (saveWelcomeButton) {
+  saveWelcomeButton.addEventListener('click', async () => {
+    const channelInput = document.getElementById('welcomeChannelInput');
+    const messageInput = document.getElementById('welcomeMessageInput');
+
+    if (!channelInput || !messageInput) return;
+
+    await fetch('/api/welcome', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        channelId: channelInput.value,
+        message: messageInput.value
+      })
+    });
+  });
+}
