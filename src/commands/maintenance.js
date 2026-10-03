@@ -1,11 +1,11 @@
 const { SlashCommandBuilder, PermissionFlagsBits, ContainerBuilder, SectionBuilder, TextDisplayBuilder, ThumbnailBuilder, SeparatorBuilder, MessageFlags } = require('discord.js');
 const config = require('../config');
-const { setMaintenance } = require('../db');
+const { getGuildConfig, createOrUpdateGuildConfig, getGlobalState } = require('../db');
 
-function buildMaintenanceContainer({ enabled, client }) {
+function buildMaintenanceContainer({ enabled, client, guildId, customMessage }) {
   const title = enabled ? '## 🚧 Flix maintenance mode' : '## ✅ Flix online';
   const body = enabled
-    ? `**Status:** Under major updates\n**Message:** ${config.MAINTENANCE_MESSAGE}\n**Note:** All commands are temporarily paused until the bot returns.`
+    ? `**Status:** Under major updates\n**Message:** ${customMessage || 'This server is under maintenance.'}\n**Note:** All commands are temporarily paused until the bot returns.`
     : `**Status:** Live and operational\n**Message:** Flix is back online and ready to serve the community.`;
 
   return new ContainerBuilder()
@@ -36,14 +36,26 @@ function buildMaintenanceContainer({ enabled, client }) {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('maintenance')
-    .setDescription('Put the Flix bot into or out of maintenance mode.')
-    .addBooleanOption(option =>
+    .setDescription('Put this server or the bot into maintenance mode.')
+    .addStringOption(option =>
       option
-        .setName('enabled')
-        .setDescription('Enable or disable maintenance mode.')
+        .setName('mode')
+        .setDescription('Maintenance mode type')
         .setRequired(true)
+        .addChoices(
+          { name: 'Enable (This Server)', value: 'server-enable' },
+          { name: 'Disable (This Server)', value: 'server-disable' },
+          { name: 'Enable (Global)', value: 'global-enable' },
+          { name: 'Disable (Global)', value: 'global-disable' }
+        )
+    )
+    .addStringOption(option =>
+      option
+        .setName('message')
+        .setDescription('Custom maintenance message (optional)')
+        .setRequired(false)
     ),
-  async execute(interaction, client) {
+  async execute(interaction, client, { getGuildConfig, createOrUpdateGuildConfig, getGlobalState }) {
     if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
       await interaction.reply({
         content: 'You need administrator permissions to toggle maintenance mode.',
@@ -52,9 +64,36 @@ module.exports = {
       return;
     }
 
-    const enabled = interaction.options.getBoolean('enabled');
-    const state = setMaintenance(enabled);
-    const container = buildMaintenanceContainer({ enabled, client });
+    const mode = interaction.options.getString('mode');
+    const customMessage = interaction.options.getString('message');
+    const { setGlobalMaintenance } = require('../db');
+
+    let container;
+    let successMessage = '';
+
+    if (mode === 'server-enable') {
+      createOrUpdateGuildConfig(interaction.guildId, {
+        maintenanceEnabled: true,
+        maintenanceMessage: customMessage || 'This server is under maintenance.'
+      });
+      container = buildMaintenanceContainer({ enabled: true, client, guildId: interaction.guildId, customMessage });
+      successMessage = '🚧 Server maintenance mode enabled.';
+    } else if (mode === 'server-disable') {
+      createOrUpdateGuildConfig(interaction.guildId, {
+        maintenanceEnabled: false,
+        maintenanceMessage: null
+      });
+      container = buildMaintenanceContainer({ enabled: false, client });
+      successMessage = '✅ Server maintenance mode disabled.';
+    } else if (mode === 'global-enable') {
+      setGlobalMaintenance(true);
+      container = buildMaintenanceContainer({ enabled: true, client, customMessage });
+      successMessage = '🚧 Global maintenance mode enabled. All servers affected.';
+    } else if (mode === 'global-disable') {
+      setGlobalMaintenance(false);
+      container = buildMaintenanceContainer({ enabled: false, client });
+      successMessage = '✅ Global maintenance mode disabled. All servers back online.';
+    }
 
     await interaction.reply({
       components: [container],
@@ -62,21 +101,6 @@ module.exports = {
       ephemeral: false
     });
 
-    const guild = client.guilds.cache.get(config.SERVER_ID);
-    const channel = guild?.channels.cache.get(config.MAINTENANCE_CHANNEL_ID) || guild?.systemChannel;
-
-    if (channel && channel.isTextBased()) {
-      await channel.send(enabled ? config.MAINTENANCE_MESSAGE : 'Flix is back online. Thanks for your patience!');
-    }
-
-    await client.user.setActivity(enabled ? 'Flix | maintenance mode' : 'Flix | live community', { type: 3 });
-
-    if (!enabled) {
-      console.log('Maintenance mode disabled. Bot is live again.');
-    } else {
-      console.log('Maintenance mode enabled. Bot is offline to end users.');
-    }
-
-    return state;
+    console.log(`[${interaction.guildId}] ${successMessage}`);
   }
 };
