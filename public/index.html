@@ -12,49 +12,213 @@
         <div class="brand">
           <div class="brand-badge">F</div>
           <div>
-            <p class="eyebrow">Community Bot</p>
             <h1>Flix</h1>
+            <p class="eyebrow">Community Bot</p>
           </div>
         </div>
 
         <nav>
-          <a href="#" class="active">Overview</a>
-          <a href="#">Guild Settings</a>
-          <a href="#">Automation</a>
-          <a href="#">Maintenance</a>
+          <a href="#overview" class="nav-link active" data-tab="overview">Overview</a>
+          <a href="#guild-settings" class="nav-link" data-tab="guild-settings">Guild Settings</a>
+          <a href="#automation" class="nav-link" data-tab="automation">Automation</a>
+          <a href="#maintenance" class="nav-link" data-tab="maintenance">Maintenance</a>
+          <a href="#embeds" class="nav-link" data-tab="embeds">Embed Builder</a>
+          <a href="#logs" class="nav-link" data-tab="logs">Logs</a>
         </nav>
       </aside>
 
       <main class="content">
-        <header class="topbar">
-          <div>
-            <p class="eyebrow">Bot Control Center</p>
-            <h2>System overview</h2>
-          </div>
-          <button id="toggleMaintenance" class="primary-button">Toggle maintenance</button>
-        </header>
+        <!-- OVERVIEW TAB -->
+        <div id="overview" class="tab-content active">
+          <header class="topbar">
+            <div>
+              <p class="eyebrow">System Status</p>
+              <h2>Overview</h2>
+            </div>
+            <button id="toggleMaintenance" class="primary-button">Toggle Maintenance</button>
+          </header>
 
-        <section class="stats">
-          <article class="stat-card">
-            <span class="label">Bot status</span>
-            <strong id="statusText">Loading...</strong>
-          </article>
-          <article class="stat-card">
-            <span class="label">Guild locked</span>
-            <strong id="serverId">Loading...</strong>
-          </article>
-          <article class="stat-card">
-            <span class="label">Welcome channel</span>
-            <strong id="welcomeChannel">Loading...</strong>
-          </article>
-        </section>
+          <section class="stats">
+            <article class="stat-card">
+              <span class="label">Bot Status</span>
+              <strong id="statusText">Loading...</strong>
+              <span class="status-badge" id="statusBadge"></span>
+            </article>
+            <article class="stat-card">
+              <span class="label">Guild ID</span>
+              <strong id="serverId">Loading...</strong>
+            </article>
+            <article class="stat-card">
+              <span class="label">Welcome Channel</span>
+              <strong id="welcomeChannel">Loading...</strong>
+            </article>
+            <article class="stat-card">
+              <span class="label">Maintenance Channel</span>
+              <strong id="maintenanceChannel">Loading...</strong>
+            </article>
+          </section>
 
-        <section class="panel">
-          <div class="panel-header">
-            <h3>Maintenance broadcast</h3>
-          </div>
-          <p id="maintenanceMessage">Loading...</p>
-        </section>
+          <section class="panel">
+            <div class="panel-header">
+              <h3>Status Information</h3>
+            </div>
+            <p id="maintenanceMessage" style="color: #6b7280; line-height: 1.6;">Loading...</p>
+            <p id="lastUpdated" style="color: #9ca3af; font-size: 0.85rem; margin-top: 16px;"></p>
+          </section>
+        </div>
+
+        <!-- GUILD SETTINGS TAB -->
+        <div id="guild-settings" class="tab-content">
+          <header class="topbar">
+            <div>
+              <p class="eyebrow">Configuration</p>
+              <h2>Guild Settings</h2>
+            </div>
+          </header>
+
+          <section class="panel">
+            <div class="panel-header">
+              <h3>Guild Configuration</h3>
+            </div>
+            <div class="setting-group">
+              <label>Server ID</label>
+              <input type="text" id="settingGuildId" readonly />
+            </div>
+            <div class="setting-group">
+              <label>Welcome Channel ID</label>
+              <input type="text" id="settingWelcomeChannelId" />
+            </div>
+            <div class="setting-group">
+              <label>Maintenance Channel ID</label>
+              <input type="text" id="settingMaintenanceChannelId" />
+            </div>
+            <div class="button-group">
+              <button class="primary-button" onclick="saveGuildSettings()">Save Settings</button>
+              <button class="secondary-button" onclick="resetGuildSettings()">Reset</button>
+            </div>
+          </section>
+        </div>
+
+        <!-- AUTOMATION TAB -->
+        <div id="automation" class="tab-content">
+          <header class="topbar">
+            <div>
+              <p class="eyebrow">Automation & Events</p>
+              <h2>Automation Rules</h2>
+            </div>
+          </header>
+
+          <section class="panel">
+            <div class="panel-header">
+              <h3>Welcome Message</h3>
+            </div>
+            <div class="alert info">Welcome messages are automatically sent to new members joining the configured server.</div>
+            <div class="setting-group">
+              <label>Welcome Message Content</label>
+              <textarea id="welcomeMessageContent" rows="4" placeholder="Enter welcome message..."></textarea>
+            </div>
+            <div class="button-group">
+              <button class="primary-button" onclick="saveWelcomeMessage()">Save Message</button>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <h3>Auto-Response Rules</h3>
+            </div>
+            <div class="alert info">Configure automatic responses for specific keywords or patterns.</div>
+            <p style="color: #6b7280; margin-top: 16px;">Auto-response rules coming soon...</p>
+          </section>
+        </div>
+
+        <!-- MAINTENANCE TAB -->
+        <div id="maintenance" class="tab-content">
+          <header class="topbar">
+            <div>
+              <p class="eyebrow">System Control</p>
+              <h2>Maintenance Mode</h2>
+            </div>
+          </header>
+
+          <section class="panel">
+            <div class="panel-header">
+              <h3>Maintenance Controls</h3>
+            </div>
+            <div class="alert warning">Enabling maintenance mode will disable all bot commands and show a maintenance message to users.</div>
+            <div class="setting-group">
+              <label>Maintenance Status</label>
+              <div id="maintenanceStatus" style="padding: 12px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; color: #6b7280;">Loading...</div>
+            </div>
+            <div class="setting-group">
+              <label>Maintenance Message</label>
+              <textarea id="maintenanceMessageContent" rows="4" placeholder="Enter maintenance message..."></textarea>
+            </div>
+            <div class="button-group">
+              <button id="enableMaintenanceBtn" class="primary-button" onclick="enableMaintenance()">Enable Maintenance</button>
+              <button id="disableMaintenanceBtn" class="secondary-button" onclick="disableMaintenance()" style="display: none;">Disable Maintenance</button>
+            </div>
+          </section>
+        </div>
+
+        <!-- EMBED BUILDER TAB -->
+        <div id="embeds" class="tab-content">
+          <header class="topbar">
+            <div>
+              <p class="eyebrow">Message Formatting</p>
+              <h2>Embed Builder (v2 Components)</h2>
+            </div>
+          </header>
+
+          <section class="panel">
+            <div class="panel-header">
+              <h3>Build Custom Embeds</h3>
+            </div>
+            <div class="alert info">Create beautiful Discord embed messages with v2 component styling.</div>
+            <div class="setting-group">
+              <label>Embed Title</label>
+              <input type="text" id="embedTitle" placeholder="Enter title..." />
+            </div>
+            <div class="setting-group">
+              <label>Embed Description</label>
+              <textarea id="embedDescription" rows="4" placeholder="Enter description..."></textarea>
+            </div>
+            <div class="setting-group">
+              <label>Accent Color (Hex)</label>
+              <input type="text" id="embedColor" placeholder="#6d82ff" value="#6d82ff" />
+            </div>
+            <div class="setting-group">
+              <label>Fields (JSON)</label>
+              <textarea id="embedFields" rows="3" placeholder='[{"name": "Field Name", "value": "Field Value"}]'></textarea>
+            </div>
+            <div class="button-group">
+              <button class="primary-button" onclick="previewEmbed()">Preview Embed</button>
+              <button class="secondary-button" onclick="copyEmbedCode()">Copy Code</button>
+            </div>
+
+            <div id="embedPreview" class="embed-preview" style="display: none;">
+              <code id="embedPreviewCode"></code>
+            </div>
+          </section>
+        </div>
+
+        <!-- LOGS TAB -->
+        <div id="logs" class="tab-content">
+          <header class="topbar">
+            <div>
+              <p class="eyebrow">System Activity</p>
+              <h2>Logs</h2>
+            </div>
+          </header>
+
+          <section class="panel">
+            <div class="panel-header">
+              <h3>Recent Activity</h3>
+            </div>
+            <div id="logsList" style="max-height: 500px; overflow-y: auto;">
+              <p style="color: #6b7280;">Loading logs...</p>
+            </div>
+          </section>
+        </div>
       </main>
     </div>
 

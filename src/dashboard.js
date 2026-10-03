@@ -35,6 +35,26 @@ app.post('/api/maintenance', (req, res) => {
   });
 });
 
+app.get('/api/settings', (req, res) => {
+  res.json({
+    guildId: config.SERVER_ID,
+    welcomeChannelId: config.WELCOME_CHANNEL_ID,
+    maintenanceChannelId: config.MAINTENANCE_CHANNEL_ID,
+    appName: config.APP_NAME
+  });
+});
+
+app.post('/api/settings', (req, res) => {
+  const { welcomeChannelId, maintenanceChannelId } = req.body;
+  // In a real app, you'd persist these changes
+  res.json({
+    success: true,
+    message: 'Settings updated',
+    welcomeChannelId,
+    maintenanceChannelId
+  });
+});
+
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
