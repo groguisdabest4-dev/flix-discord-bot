@@ -1,9 +1,1 @@
-const { APP_NAME, MAINTENANCE_MESSAGE, SERVER_ID, WELCOME_CHANNEL_ID, MAINTENANCE_CHANNEL_ID } = require('./config');
-
-module.exports = {
-  APP_NAME,
-  MAINTENANCE_MESSAGE,
-  SERVER_ID,
-  WELCOME_CHANNEL_ID,
-  MAINTENANCE_CHANNEL_ID
-};
+require('dotenv').config();\n\nmodule.exports = {\n  // Bot Configuration\n  DISCORD_TOKEN: process.env.DISCORD_TOKEN,\n  DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,\n  DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,\n\n  // App Configuration\n  APP_NAME: process.env.APP_NAME || 'Flix',\n  DASHBOARD_PORT: process.env.DASHBOARD_PORT || 3000,\n  PUBLIC_URL: process.env.PUBLIC_URL || 'http://localhost:3000',\n\n  // Server Configuration (Legacy - for backwards compatibility)\n  SERVER_ID: process.env.SERVER_ID,\n  WELCOME_CHANNEL_ID: process.env.WELCOME_CHANNEL_ID,\n  MAINTENANCE_CHANNEL_ID: process.env.MAINTENANCE_CHANNEL_ID,\n\n  // Messages\n  MAINTENANCE_MESSAGE: process.env.MAINTENANCE_MESSAGE || 'Flix is currently under major updates. We will let you know when the bot is back online.',\n  WELCOME_MESSAGE: process.env.WELCOME_MESSAGE || 'Welcome to our community! We\\'re excited to have you here.',\n\n  // Environment\n  NODE_ENV: process.env.NODE_ENV || 'development',\n  DEBUG: process.env.DEBUG === 'true' || false\n};\n
