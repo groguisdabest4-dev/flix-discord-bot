@@ -1,14 +1,9 @@
 const fs = require('fs');
 const path = require('path');
-const config = require('./config');
 
 function loadCommands() {
-  const commandsDir = path.join(__dirname, 'commands');
+  const commandsDir = path.join(__dirname, '.');
   const commandMap = new Map();
-
-  if (!fs.existsSync(commandsDir)) {
-    return commandMap;
-  }
 
   const files = fs.readdirSync(commandsDir)
     .filter(file => file.endsWith('.js') && file !== 'register.js' && file !== 'index.js');
@@ -24,4 +19,19 @@ function loadCommands() {
   return commandMap;
 }
 
-module.exports = { loadCommands };
+// Command metadata
+const AVAILABLE_COMMANDS = {
+  ping: { name: 'ping', category: 'utility', description: 'Returns bot latency' },
+  help: { name: 'help', category: 'utility', description: 'Show all available commands' },
+  info: { name: 'info', category: 'utility', description: 'Show server information' },
+  stats: { name: 'stats', category: 'utility', description: 'Show member statistics' },
+  website: { name: 'website', category: 'utility', description: 'Show server website' },
+  invite: { name: 'invite', category: 'utility', description: 'Get server invite link' },
+  maintenance: { name: 'maintenance', category: 'admin', description: 'Toggle maintenance mode' },
+  kick: { name: 'kick', category: 'moderation', description: 'Kick a member' },
+  ban: { name: 'ban', category: 'moderation', description: 'Ban a member' },
+  mute: { name: 'mute', category: 'moderation', description: 'Mute a member' },
+  warn: { name: 'warn', category: 'moderation', description: 'Warn a member' }
+};
+
+module.exports = { loadCommands, AVAILABLE_COMMANDS };
